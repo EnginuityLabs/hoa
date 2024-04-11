@@ -1,0 +1,15 @@
+.leaflet-container {
+  width: 100%;
+  height: 200px !important;
+}
+
+.leaflet-control-attribution > a {
+  color: currentColor !important;
+  display: inline-block !important;
+  pointer-events: none !important;
+  text-decoration: none !important;
+}
+
+.leaflet-attribution-flag {
+  display: none !important;
+}
