@@ -14,7 +14,6 @@ function purify(input) {
 export async function onRequestPost(context) {
   const formData = await context.request.formData();
   const input = JSON.parse(formData.get("jsonData"));
-  input.description = "<h1>testing</h1>";
   const lat = input.lat == undefined ? undefined : purify(input.lat);
   const lng = input.lat == undefined ? undefined : purify(input.lng);
   const files = !Array.isArray(input.files)
