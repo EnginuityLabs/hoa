@@ -27,21 +27,25 @@ import {
   Input,
 } from "@chakra-ui/react";
 
+let MAP_POSITION: LatLng | null = null;
+
 function DraggableMarker() {
   const [position, setPosition] = useState<LatLng | null>(null);
 
   const map = useMapEvents({
     click(e) {
+      MAP_POSITION = e.latlng;
       setPosition(e.latlng);
       map.flyTo(e.latlng, map.getZoom());
     },
     dragend() {
+      MAP_POSITION = map.getCenter();
       setPosition(map.getCenter());
     },
     locationfound(e) {
+      MAP_POSITION = e.latlng;
       setPosition(e.latlng);
       map.flyTo(e.latlng, map.getZoom());
-      console.log(e.latlng);
     },
   });
 
@@ -56,8 +60,8 @@ function DraggableMarker() {
       eventHandlers={{
         dragend(e) {
           const marker = e.target;
+          MAP_POSITION = marker.getLatLong();
           setPosition(marker.getLatLng());
-          console.log(marker.getLatLng());
         },
       }}
       icon={
@@ -72,18 +76,51 @@ function DraggableMarker() {
   );
 }
 
+let FILES: string[] = [];
+let DESCRIPTION: string = "";
+let CONTACT: string = "";
+
 function App() {
+  const submit = () => {
+    const payload = {
+      lat: MAP_POSITION?.lat,
+      lng: MAP_POSITION?.lng,
+      files: FILES,
+      description: DESCRIPTION,
+      contact: CONTACT,
+    };
+    var form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/submit";
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "jsonData";
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  };
+
+  const filesChanged = (event: any) => {
+    FILES = event?.fileList?.map((v: any) => v?.response?.name);
+  };
+
+  const descriptionChanged = (event: any) => {
+    DESCRIPTION = event?.target?.value || "";
+  };
+
+  const contactChanged = (event: any) => {
+    CONTACT = event?.target?.value || "";
+  };
+
   return (
     <ChakraProvider>
       <Card m={2}>
         <CardHeader>
           <Heading>Power Ranch Watch</Heading>
           <Text>
-            This is an <b>Unofficial</b> App for reporting problems to the Power
-            Ranch HOA.
-            <br />
-            It will generate an email from the input on this page and deliver it
-            to the HOA.
+            This is an <b>UNOFFICIAL</b> app for notifying the Power Ranch HOA
+            of problems via email.
           </Text>
         </CardHeader>
         <CardBody>
@@ -104,7 +141,11 @@ function App() {
             </FormControl>
             <FormControl>
               <FormLabel>Show them the problem</FormLabel>
-              <Upload action="./upload" listType="picture">
+              <Upload
+                action="./upload"
+                listType="picture"
+                onChange={filesChanged}
+              >
                 <AButton icon={<UploadOutlined />}>Upload</AButton>
               </Upload>
               <FormHelperText>
@@ -113,18 +154,20 @@ function App() {
             </FormControl>
             <FormControl>
               <FormLabel>Tell them the problem</FormLabel>
-              <Textarea />
+              <Textarea onChange={descriptionChanged} />
               <FormHelperText>
                 (Encouraged) Sometimes a picture is worth a 1000 words, but
-                sometimes you need to describe what is in the picture
+                sometimes you need to tell them what they're supposed to be
+                looking at.
               </FormHelperText>
             </FormControl>
             <FormControl>
               <FormLabel>How do they contact you?</FormLabel>
-              <Input type="email" />
+              <Input type="email" onChange={contactChanged} />
               <FormHelperText>
                 (Encouraged) Email address for the HOA to follow up with you, a
-                copy of the generated email will be delivered here
+                copy of the generated email will be delivered here as well for
+                your records.
               </FormHelperText>
             </FormControl>
             <>
@@ -132,6 +175,7 @@ function App() {
                 loadingText="Submitting"
                 colorScheme="blue"
                 variant="solid"
+                onClick={submit}
               >
                 Submit
               </Button>
