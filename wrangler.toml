@@ -5,6 +5,7 @@ compatibility_date = "2024-04-11"
 
 [env.production]
 compatibility_date = "2024-04-11"
+r2_buckets = [{ binding = "BUCKET", bucket_name = "hoa" }]
 
 [[r2_buckets]]
 binding = "BUCKET"
